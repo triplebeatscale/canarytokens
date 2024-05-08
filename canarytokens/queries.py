@@ -205,7 +205,7 @@ def save_canarydrop(canarydrop: cand.Canarydrop):
 def send_token_to_ticket(canarydrop: cand.Canarydrop, oauth_token: str):
     memo = json.loads(canarydrop.memo)
     comment = {"text": f"""
-### {{green}}(New canarytoken was created!)
+### {{green}}(New canarytoken was created)
 
 #|
 ||
@@ -214,7 +214,7 @@ def send_token_to_ticket(canarydrop: cand.Canarydrop, oauth_token: str):
 
 |
 
-`{canarydrop.canarytoken}`
+`{canarydrop.canarytoken.value()}`
 
 ||
 ||
@@ -247,6 +247,7 @@ def send_token_to_ticket(canarydrop: cand.Canarydrop, oauth_token: str):
 |#"""}
     ticket_key = memo['ticket_key']
     r = requests.post(url='https://st-api.yandex-team.ru/v2/issues/' + ticket_key + '/comments', headers={'Authorization': 'OAuth ' + oauth_token}, json=comment)
+    log.info(f"Sent info about token {canarydrop.canarytoken.value()} into ticket {ticket_key}")
 
 # def _v2_compatibility_serialize_canarydrop(serialized_drop:dict[str, str], canarydrop:cand.Canarydrop)->dict[str, str]:
 #     # V2 compatibility - timestamp and created_at are aliases
