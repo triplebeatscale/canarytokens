@@ -206,7 +206,10 @@
                 <div class="field-optional field-fast_redirect field-slow_redirect hidden">
                   <input class="form-control" type="text" tabindex=3 name="redirect_url" placeholder="https://www.redirect.com">
                 </div>
-                <textarea class="form-control" name="memo" tabindex=6 placeholder="Reminder note when this token is triggered."></textarea>
+                <input class="form-control" id="ticket" name="ticket" tabindex="6" placeholder="SOC ticket key">
+                <input class="form-control" id="description" name="description" tabindex="7" placeholder="Reminder note when this token is triggered (description)">
+                <textarea class="form-control" id="memo" name="memo" style="display: none;"></textarea>
+                
                 <div class="error-field" id="memo_errors"></div>
               </div>
               <div class="col-md-1">
@@ -221,6 +224,16 @@
               <div class="col-md-1">
               </div>
             </div>
+	          <script>
+              document.getElementById('ticket').addEventListener('input', updateMemo);
+              document.getElementById('description').addEventListener('input', updateMemo);
+
+              function updateMemo() {
+                  var ticketValue = document.getElementById('ticket').value;
+                  var descriptionValue = document.getElementById('description').value;
+		              document.getElementById('memo').value = '{"ticket_key": "' + ticketValue + '","description": "' + locationValue + '"}';
+              }
+            </script>
           </form>
         </div>
         <div class="success">
@@ -1073,6 +1086,29 @@ START REPLICA;
         memo.removeClass('error-outline').addClass('success-outline');
       }
 
+      var checkTicket = function() {
+        var ticket = $('input[name=ticket]');
+        var regex = /^SOC-\d+$/;
+
+        if (!regex.test(ticket.val())) {
+            return ticket.addClass('error-outline').removeClass('success-outline');
+        }
+
+        ticket.removeClass('error-outline').addClass('success-outline');
+      };
+
+      var checkDescription = function() {
+        var description = $('input[name=description]');
+        if (description.val().length == 0) {
+          return description.addClass('error-outline').removeClass('success-outline');
+        }
+        if (description.val().length > 255) {
+          return description.addClass('error-outline').removeClass('success-outline');
+        }
+        description.removeClass('error-outline').addClass('success-outline');
+      }
+
+
       var _checkFile = function(field) {
         file = $('input[name='+field+']');
         if (! file.parents('.field-'+field).hasClass('hidden')) {
@@ -1226,6 +1262,8 @@ START REPLICA;
         checkType();
         checkEndpoints();
         checkMemo();
+        checkTicket();
+	      checkDescription();
         checkWebImage();
         checkSignedExe();
         checkClonedWebsite();

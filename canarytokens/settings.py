@@ -119,6 +119,7 @@ class FrontendSettings(BaseSettings):
     CLOUDFRONT_URL: Optional[HttpUrl]
     AZUREAPP_ID: Optional[str]
     AZUREAPP_SECRET: Optional[str]  # TODO: Figure out SecretStr with Azure secrets
+    ST_OAUTH_TOKEN: str = os.getenv("ST_OAUTH_TOKEN")
 
     class Config:
         allow_mutation = False

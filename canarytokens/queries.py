@@ -202,6 +202,51 @@ def save_canarydrop(canarydrop: cand.Canarydrop):
 
     add_auth_token_idx(canarydrop.auth, canarydrop.canarytoken.value())
 
+def send_token_to_ticket(canarydrop: cand.Canarydrop, oauth_token: str):
+    memo = json.loads(canarydrop.memo)
+    comment = {"text": f"""
+### {{green}}(New canarytoken was created!)
+
+#|
+||
+
+**ID**
+
+|
+
+`{canarydrop.canarytoken}`
+
+||
+||
+
+**Тип**
+
+|
+
+`{canarydrop.type}`
+
+||
+||
+
+**Описание**
+
+|
+
+`{memo['description']}`
+
+||
+||
+
+**Сгенерированный URL**
+
+|
+
+`{canarydrop.generated_url}`
+
+||
+|#"""}
+    ticket_key = memo['ticket_key']
+    r = requests.post(url='https://st-api.yandex-team.ru/v2/issues/' + ticket_key + '/comments', headers={'Authorization': 'OAuth ' + oauth_token}, json=comment)
 
 # def _v2_compatibility_serialize_canarydrop(serialized_drop:dict[str, str], canarydrop:cand.Canarydrop)->dict[str, str]:
 #     # V2 compatibility - timestamp and created_at are aliases
@@ -1038,3 +1083,4 @@ def wireguard_keymap_del(public_key: bytes) -> None:
 
 def wireguard_keymap_get(public_key: bytes) -> Optional[str]:
     return DB.get_db().hget(KEY_WIREGUARD_KEYMAP, public_key)
+

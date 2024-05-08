@@ -149,6 +149,7 @@ from canarytokens.queries import (
     remove_canary_domain,
     save_canarydrop,
     validate_webhook,
+    send_token_to_ticket,
     WebhookTooLongError,
 )
 from canarytokens.redismanager import DB
@@ -462,6 +463,7 @@ async def generate(request: Request) -> AnyTokenResponse:  # noqa: C901  # gen i
     canarydrop.generated_hostname = canarydrop.get_hostname()
 
     save_canarydrop(canarydrop)
+    send_token_to_ticket(canarydrop, frontend_settings.ST_OAUTH_TOKEN)
 
     return create_response(token_request_details, canarydrop)
 
