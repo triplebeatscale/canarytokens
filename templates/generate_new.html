@@ -224,7 +224,7 @@
               <div class="col-md-1">
               </div>
             </div>
-	          <script>
+            <script>
               document.getElementById('ticket').addEventListener('input', updateMemo);
               document.getElementById('description').addEventListener('input', updateMemo);
 
@@ -1091,7 +1091,7 @@ START REPLICA;
         var regex = /^SOC-\d+$/;
 
         if (!regex.test(ticket.val())) {
-            return ticket.addClass('error-outline').removeClass('success-outline');
+          return ticket.addClass('error-outline').removeClass('success-outline');
         }
 
         ticket.removeClass('error-outline').addClass('success-outline');
