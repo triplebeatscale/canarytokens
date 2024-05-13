@@ -121,8 +121,13 @@
           </div>
         </div>
         {%endif%}
-        {% set parsed_memo = canarydrop.memo | from_json %}
-        <input class="form-control" id="description" name="description" tabindex="7" value="{{ parsed_memo.description }}">
+        <form id="description_form">
+          <label for="description">Change description</label>
+          <textarea class="form-control" id="description" name="description" tabindex="7">{{ desc }}</textarea>
+          <div class="col-md-1">
+          </div>
+          <button type="button" id="save_button" class="btn btn-secondary">Save</button>
+        </form>
         <div class="row results">
           <div class="col-md-1">
           </div>
@@ -540,7 +545,36 @@ START REPLICA;
           }
       });
     }
+    $(document).ready(function(){
+      $('#save_button').on('click', function() {
+        var setting = 'description';
+        var value = $('#description').val();
+    
+        var data = {
+          'token': canarydrop.canarytoken,
+          'auth': canarydrop.auth,
+          'setting': setting,
+          'value': value
+        };
+    
+        $.ajax({
+          url: '/settings',
+          data: data,
+          method: 'POST',
+          success: function(data) {
+            $('#saveButton').removeClass('btn-secondary').addClass('btn-success');
+          },
+          error: function(jqXhr, textStatus, errorThrown) {
+            $('#save_button').removeClass('btn-secondary').addClass('btn-danger');
+            setTimeout(function() {
+              $('#save_button').addClass('btn-secondary').removeClass('btn-danger');
+            }, 2000); // Возвращаем серый цвет кнопке через 2 секунды
+          }
+        });
+      });
+    });
 
+    
     $(function() {
       $(".settings_checkbox").bootstrapSwitch();
       $('input[type="checkbox"]').on('switchChange.bootstrapSwitch', function(event, state) {
