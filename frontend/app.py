@@ -487,7 +487,7 @@ async def manage_page_get(
         "public_ip": frontend_settings.PUBLIC_IP,
         "wg_private_key_seed": switchboard_settings.WG_PRIVATE_KEY_SEED,
         "wg_private_key_n": switchboard_settings.WG_PRIVATE_KEY_N,
-        "desc": json.loads(canarydrop.memo)
+        "desc": json.loads(canarydrop.memo)["description"]
     }
 
     if canarydrop.type == TokenTypes.WIREGUARD:

@@ -121,6 +121,14 @@
           </div>
         </div>
         {%endif%}
+        <style>
+          #description {
+            width: 300px;
+            height: 100px;
+            margin: 0 auto;
+            text-align: center;
+          }
+        </style>
         <form id="description_form">
           <label for="description">Change description</label>
           <textarea class="form-control" id="description" name="description" tabindex="7">{{ desc }}</textarea>
