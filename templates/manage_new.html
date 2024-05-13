@@ -132,8 +132,7 @@
         <form id="description_form">
           <label for="description">Change description</label>
           <textarea class="form-control" id="description" name="description" tabindex="7">{{ desc }}</textarea>
-          <div class="col-md-1">
-          </div>
+          <br>
           <button type="button" id="save_button" class="btn btn-secondary">Save</button>
         </form>
         <div class="row results">
@@ -570,13 +569,16 @@ START REPLICA;
           data: data,
           method: 'POST',
           success: function(data) {
-            $('#saveButton').removeClass('btn-secondary').addClass('btn-success');
+            $('#save_button').removeClass('btn-secondary').addClass('btn-success');
+            setTimeout(function() {
+              $('#save_button').addClass('btn-secondary').removeClass('btn-success');
+            }, 2000);
           },
           error: function(jqXhr, textStatus, errorThrown) {
             $('#save_button').removeClass('btn-secondary').addClass('btn-danger');
             setTimeout(function() {
               $('#save_button').addClass('btn-secondary').removeClass('btn-danger');
-            }, 2000); // Возвращаем серый цвет кнопке через 2 секунды
+            }, 2000);
           }
         });
       });
