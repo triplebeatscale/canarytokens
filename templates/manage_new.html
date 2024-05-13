@@ -121,6 +121,8 @@
           </div>
         </div>
         {%endif%}
+        {% set parsed_memo = canarydrop.memo | from_json %}
+        <input class="form-control" id="description" name="description" tabindex="7" value="{{ parsed_memo.description }}">
         <div class="row results">
           <div class="col-md-1">
           </div>

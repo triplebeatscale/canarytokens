@@ -2473,6 +2473,7 @@ class CanarydropSettingsTypes(str, enum.Enum):
     WEBHOOKSETTING = "webhook_enable"
     BROWSERSCANNERSETTING = "browser_scanner_enable"
     WEBIMAGESETTING = "web_image_enable"
+    DESCRIPTIONSETTING = "description"
 
     def __str__(self) -> str:
         return str(self.value)
@@ -2508,6 +2509,14 @@ class WebImageSettingsRequest(SettingsRequest):
         CanarydropSettingsTypes.WEBIMAGESETTING
     ] = CanarydropSettingsTypes.WEBIMAGESETTING
 
+class DescriptionSettingsRequest(BaseModel):
+    value: str = ""
+    token: str = ""
+    auth: str = ""
+    setting: Literal[
+        CanarydropSettingsTypes.DESCRIPTIONSETTING
+    ] = CanarydropSettingsTypes.DESCRIPTIONSETTING
+
 
 AnySettingsRequest = Annotated[
     Union[
@@ -2515,6 +2524,7 @@ AnySettingsRequest = Annotated[
         WebhookSettingsRequest,
         BrowserScannerSettingsRequest,
         WebImageSettingsRequest,
+        DescriptionSettingsRequest
     ],
     Field(discriminator="setting"),
 ]
@@ -2532,6 +2542,7 @@ class ManageTokenSettingsRequest(BaseModel):
     sms_enable: Optional[Literal["on", "off"]]
     web_image_enable: Optional[Literal["on", "off"]]
     browser_scanner_enable: Optional[Literal["on", "off"]]
+    description: Optional[str]
     # Add validation for the token and auth fields
 
 

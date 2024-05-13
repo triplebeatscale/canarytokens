@@ -38,6 +38,7 @@ from canarytokens.models import (
     User,
     WebhookSettingsRequest,
     WebImageSettingsRequest,
+    DescriptionSettingsRequest
 )
 
 logger = logging.getLogger(__name__)
@@ -229,6 +230,10 @@ class Canarydrop(BaseModel):
             self.alert_webhook_enabled = setting_request.value == "on"
         elif isinstance(setting_request, BrowserScannerSettingsRequest):
             self.browser_scanner_enabled = setting_request.value == "on"
+        elif isinstance(setting_request, DescriptionSettingsRequest):
+            memo = json.loads(self.memo)
+            memo['description'] = setting_request.value
+            self.memo = json.dumps(memo)
         else:
             logger.error(
                 f"Canarydrops cannot apply a settings change for: {setting_request}"
