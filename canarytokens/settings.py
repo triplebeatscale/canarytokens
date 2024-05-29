@@ -8,7 +8,7 @@ from canarytokens.models import Port
 
 
 class SwitchboardSettings(BaseSettings):
-    PUBLIC_DOMAIN: str
+    PUBLIC_DOMAIN: str = os.getenv("PUBLIC_DOMAIN")
     CHANNEL_DNS_IP: str = ""
     CHANNEL_DNS_PORT: Port = Port(5354)
     CHANNEL_HTTP_PORT: Port = Port(8083)
@@ -26,7 +26,7 @@ class SwitchboardSettings(BaseSettings):
 
     REAL_IP_HEADER: str = "x-real-ip"
 
-    WG_PRIVATE_KEY_SEED: str
+    WG_PRIVATE_KEY_SEED: str = os.getenv("WG_PRIVATE_KEY_SEED")
     WG_PRIVATE_KEY_N: str = "1000"
 
     FRONTEND_SETTINGS_PATH: str = "../frontend/frontend.env"
@@ -75,9 +75,9 @@ class SwitchboardSettings(BaseSettings):
 class FrontendSettings(BaseSettings):
     API_APP_TITLE: str = "Canarytokens"
     API_VERSION_STR: str = "v1"
-    PUBLIC_IP: str
-    DOMAINS: list[str]
-    NXDOMAINS: list[str]
+    PUBLIC_IP: str = os.getenv("CANARY_PUBLIC_IP")
+    DOMAINS: list[str] = os.getenv("CANARY_DOMAINS").split(",")
+    NXDOMAINS: list[str] = os.getenv("CANARY_NXDOMAINS").split(",")
     SWITCHBOARD_SETTINGS_PATH: str = "../switchboard/switchboard.env"
 
     SENTRY_DSN: Optional[HttpUrl] = None
