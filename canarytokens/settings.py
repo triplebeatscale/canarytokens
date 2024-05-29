@@ -19,9 +19,9 @@ class SwitchboardSettings(BaseSettings):
     SWITCHBOARD_SCHEME: str = "https"
     FORCE_HTTPS: bool = False
     # TODO: Remove this default here and added it where it's used. This is too opinionated.
-    REDIS_HOST: str = "localhost" if strtobool(os.getenv("CI", "False")) else "redis"
+    REDIS_HOST: str = os.getenv("REDIS_HOST","localhost")
     REDIS_PORT: Port = Port(6379)
-    REDIS_DB: str = "0"
+    REDIS_DB: str = os.getenv("REDIS_DB","0")
     REDIS_PASSWORD: str = os.getenv("REDIS_PASSWORD", "auth_disabled")
 
     REAL_IP_HEADER: str = "x-real-ip"
