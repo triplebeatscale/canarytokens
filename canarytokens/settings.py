@@ -10,9 +10,9 @@ from canarytokens.models import Port
 class SwitchboardSettings(BaseSettings):
     PUBLIC_DOMAIN: str = os.getenv("PUBLIC_DOMAIN")
     CHANNEL_DNS_IP: str = ""
-    CHANNEL_DNS_PORT: Port = Port(5354)
-    CHANNEL_HTTP_PORT: Port = Port(8083)
-    CHANNEL_SMTP_PORT: Port = Port(2500)
+    CHANNEL_DNS_PORT: Port = Port(53)
+    CHANNEL_HTTP_PORT: Port = Port(80)
+    CHANNEL_SMTP_PORT: Port = Port(25)
     CHANNEL_MYSQL_PORT: Port = Port(3306)
     CHANNEL_MTLS_KUBECONFIG_PORT: Port = Port(6443)
     CHANNEL_WIREGUARD_PORT: Port = Port(51820)
