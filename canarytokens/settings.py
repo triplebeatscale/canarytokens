@@ -79,6 +79,7 @@ class FrontendSettings(BaseSettings):
     DOMAINS: list[str] = os.getenv("CANARY_DOMAINS").split(",")
     NXDOMAINS: list[str] = os.getenv("CANARY_NXDOMAINS").split(",")
     SWITCHBOARD_SETTINGS_PATH: str = "../switchboard/switchboard.env"
+    WEBHOOK_URL: str = os.getenv("WEBHOOK_URL")
 
     SENTRY_DSN: Optional[HttpUrl] = None
     SENTRY_ENVIRONMENT: Literal["prod", "staging", "dev", "ci", "local"] = "local"
