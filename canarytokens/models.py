@@ -432,8 +432,8 @@ class TokenRequest(BaseModel):
 
     @root_validator
     def check_email_or_webhook_opt(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        if not values.get("webhook_url") and not values.get("email"):
-            raise ValueError("either webhook or email is required")
+        # if not values.get("webhook_url") and not values.get("email"):
+        #     raise ValueError("either webhook or email is required")
         return values
 
     # Design: this might be short lived. If not we can do better.
