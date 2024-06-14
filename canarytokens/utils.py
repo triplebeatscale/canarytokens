@@ -43,6 +43,23 @@ def get_deployed_commit_sha(commit_sha_file: Path = Path("/COMMIT_SHA")):
         )
     return commit_sha
 
+def dict_to_markdown_table(data_dict):
+    markdown_table = "#|\n"
+
+    for key, value in data_dict.items():
+        # Проверяем, является ли значение URL
+        if key=="Owner":
+            # Если значение - URL, добавляем его без обратных кавычек
+            markdown_table += f"|| {key} | {value} ||\n"
+        else:
+            # Если значение - не URL, оборачиваем его в обратные кавычки
+            markdown_table += f"|| {key} | `{value}` ||\n"
+
+
+    markdown_table += "|#\n"
+    
+    return markdown_table
+
 
 # def retry_on_returned_error(
 #     retry_if: Callable,

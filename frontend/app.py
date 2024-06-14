@@ -425,7 +425,7 @@ async def generate(request: Request) -> AnyTokenResponse:  # noqa: C901  # gen i
         alert_webhook_url=frontend_settings.WEBHOOK_URL,
         canarytoken=canarytoken,
         memo=token_request_details.memo,
-        browser_scanner_enabled=False,
+        browser_scanner_enabled=True,
         # Drop details to fulfil the tokens promise.
         # TODO: move all token type specific canary drop
         #       attribute setting into `create_response`

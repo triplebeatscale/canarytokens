@@ -2,19 +2,28 @@
 from __future__ import annotations
 
 import base64
+import requests
 import datetime
 import json
 import re
 import secrets
+import segno
 from ipaddress import IPv4Address
 from typing import Dict, List, Literal, Optional, Tuple, Union
 
-import requests
 from pydantic import EmailStr, HttpUrl, ValidationError, parse_obj_as
 from twisted.logger import Logger
+from pathlib import Path
 
+from canarytokens.msexcel import make_canary_msexcel
+from canarytokens.msword import make_canary_msword
+from canarytokens.mysql import make_canary_mysql_dump
+from canarytokens.pdfgen import make_canary_pdf
+from canarytokens.ziplib import make_canary_zip
+from canarytokens.settings import SwitchboardSettings, FrontendSettings
+from canarytokens.utils import dict_to_markdown_table
 from canarytokens import canarydrop as cand
-from canarytokens import models, tokens, constants
+from canarytokens import models, tokens, constants, msreg
 from canarytokens.exceptions import CanarydropAuthFailure, NoCanarydropFound
 from canarytokens.redismanager import (  # KEY_BITCOIN_ACCOUNT,; KEY_BITCOIN_ACCOUNTS,; KEY_CANARY_NXDOMAINS,; KEY_CANARYTOKEN_ALERT_COUNT,; KEY_CLONEDSITE_TOKEN,; KEY_CLONEDSITE_TOKENS,; KEY_IMGUR_TOKEN,; KEY_IMGUR_TOKENS,; KEY_KUBECONFIG_CERTS,; KEY_KUBECONFIG_HITS,; KEY_KUBECONFIG_SERVEREP,; KEY_LINKEDIN_ACCOUNT,; KEY_LINKEDIN_ACCOUNTS,; KEY_USER_ACCOUNT,
     DB,
@@ -43,6 +52,8 @@ from canarytokens.redismanager import (  # KEY_BITCOIN_ACCOUNT,; KEY_BITCOIN_ACC
 
 log = Logger()
 
+switchboard_settings = SwitchboardSettings()
+frontend_settings = FrontendSettings()
 
 def get_canarydrop(canarytoken: tokens.Canarytoken) -> Optional[cand.Canarydrop]:
     canarydrop: dict = DB.get_db().hgetall(KEY_CANARYDROP + canarytoken.value())
@@ -202,51 +213,123 @@ def save_canarydrop(canarydrop: cand.Canarydrop):
 
     add_auth_token_idx(canarydrop.auth, canarydrop.canarytoken.value())
 
+def upload_attachment(canarydrop: cand.Canarydrop, oauth_token: str):
+
+    # type_fmt_mapping = {
+    #         "ms_word": "msword",
+    #         "ms_excel": "msexcel",
+    #         "adobe_pdf": "pdf",
+    #         "kubeconfig": "kubeconfig",
+    #         "qr_code": "qr_code",
+    #         "cmd": "cmd",
+    # }
+
+    if canarydrop.type == "ms_word":
+        file_content = make_canary_msword(
+                canarydrop.generated_url,
+                template=Path(frontend_settings.TEMPLATES_PATH) / "template.docx",
+            )
+        filename = f"{canarydrop.canarytoken.value()}.docx"
+    elif canarydrop.type == "ms_excel":
+        file_content = make_canary_msexcel(
+            canarydrop.generated_url,
+            template=Path(frontend_settings.TEMPLATES_PATH) / "template.xlsx",
+        )
+        filename = f"{canarydrop.canarytoken.value()}.xlsx"
+    elif canarydrop.type == "adobe_pdf":
+        file_content = make_canary_pdf(
+            hostname=canarydrop.get_hostname(nxdomain=True).encode(),
+            template=Path(frontend_settings.TEMPLATES_PATH) / "template.pdf",
+        ),
+        filename=f"{canarydrop.canarytoken.value()}.pdf"
+    elif canarydrop.type == "cmd":
+        file_content = msreg.make_canary_msreg(
+            token_hostname=canarydrop.get_hostname(),
+            process_name=canarydrop.cmd_process,
+        ),
+        filename=f"{canarydrop.canarytoken.value()}.reg"
+    elif canarydrop.type == "windows_dir":
+        hostname = f"{canarydrop.canarytoken.value()}.{frontend_settings.DOMAINS[0]}"
+        file_content = make_canary_zip(hostname)
+        filename = f"{canarydrop.canarytoken.value()}.zip"
+    elif canarydrop.type == "my_sql":
+        file_content = make_canary_mysql_dump(
+            mysql_usage=cand.Canarydrop.generate_mysql_usage(
+                token=canarydrop.canarytoken.value(),
+                domain=frontend_settings.DOMAINS[0],
+                port=switchboard_settings.CHANNEL_MYSQL_PORT,
+            ),
+            template=Path(frontend_settings.TEMPLATES_PATH) / "mysql_tables.zip",
+        ),
+        filename=f"{canarydrop.canarytoken.value()}_mysql_dump.sql.gz"
+    elif canarydrop.type == "qr_code":
+        data_uri = segno.make(canarydrop.generated_url).png_data_uri(scale=5)
+        header, encoded = data_uri.split(',', 1)
+        file_content = base64.b64decode(encoded)
+        filename=f"{canarydrop.canarytoken.value()}.png"
+
+    files = {'file': (filename, file_content)}
+    attach_response = requests.post(
+        url = f"https://st-api.yandex-team.ru/v2/attachments/",
+        headers = {'Authorization': f'OAuth {oauth_token}'},
+        files = files
+    )
+
+    return json.loads(attach_response.text)["id"]
+
 def send_token_to_ticket(canarydrop: cand.Canarydrop, oauth_token: str):
     memo = json.loads(canarydrop.memo)
-    comment = {"text": f"""
-### {{green}}(New canarytoken was created)
-
-#|
-||
-
-**ID**
-
-|
-
-`{canarydrop.canarytoken.value()}`
-
-||
-||
-
-**Тип**
-
-|
-
-`{canarydrop.type}`
-
-||
-||
-
-**Описание**
-
-|
-
-`{memo['description']}`
-
-||
-||
-
-**Сгенерированный URL**
-
-|
-
-`{canarydrop.generated_url}`
-
-||
-|#"""}
     ticket_key = memo['ticket_key']
-    r = requests.post(url='https://st-api.yandex-team.ru/v2/issues/' + ticket_key + '/comments', headers={'Authorization': 'OAuth ' + oauth_token}, json=comment)
+    comment = {
+        "text": """### {{green}}(New canarytoken was created)\n{table}\n<{{4SOC\n[Manage this token]({manage_url})\n}}>""",
+    }
+
+    if canarydrop.type in ["ms_word", "ms_excel", "adobe_pdf", "wireguard", "windows_dir", "qr_code", "signed_exe", "kubeconfig", "cmd"]:
+        attach_id = upload_attachment(canarydrop, oauth_token)
+        comment["attachmentIds"] = [attach_id]
+
+    base_properties = {
+        'ID': lambda x: x.canarytoken.value(),
+        'Тип': lambda x: x.type,
+        'Описание': lambda x: memo['description'],
+        'Owner': lambda x: f"@{memo['owner']}",
+        'ABC-duty': lambda x: memo['abc_duty'],
+    }
+    
+    specific_properties = {
+        'web': {
+            'Сгенерированный URL': lambda x: x.generated_url,
+        },
+        'dns': {
+            'Сгенерированный hostname': lambda x: x.generated_hostname,
+        },
+        'fast_redirect': {
+            'Redirect URL': lambda x: x.redirect_url,
+            'Сгенерированный URL': lambda x: x.generated_url,
+        },
+        'slow_redirect': {
+            'Redirect URL': lambda x: x.redirect_url,
+            'Сгенерированный URL': lambda x: x.generated_url,
+        },
+        'cssclonedsite': {
+            'Ожидаемый referer': lambda x: x.expected_referrer,
+            'Сгенерированный URL': lambda x: x.generated_url,
+        },
+        'clonedsite': {
+            'Ожидаемый referer': lambda x: x.expected_referrer,
+            'Сгенерированный URL': lambda x: x.generated_url,
+        },
+    }
+    properties = {**base_properties, **specific_properties.get(canarydrop.type, {})}
+    data_dict = {key: func(canarydrop) for key, func in properties.items()}
+    table = dict_to_markdown_table(data_dict)
+    manage_url = f"http://{switchboard_settings.PUBLIC_DOMAIN}/manage?token={canarydrop.canarytoken.value()}&auth={canarydrop.auth}"
+    comment['text'] = comment['text'].format(table=table, manage_url=manage_url)
+    r = requests.post(
+        url = f'https://st-api.yandex-team.ru/v2/issues/{ticket_key}/comments', 
+        headers = {'Authorization': f'OAuth {oauth_token}'}, 
+        json = comment
+    )
     log.info(f"Sent info about token {canarydrop.canarytoken.value()} into ticket {ticket_key}")
 
 # def _v2_compatibility_serialize_canarydrop(serialized_drop:dict[str, str], canarydrop:cand.Canarydrop)->dict[str, str]:

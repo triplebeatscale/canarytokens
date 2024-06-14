@@ -208,6 +208,8 @@
                 </div>
                 <input class="form-control" id="ticket" name="ticket" tabindex="6" placeholder="SOC ticket key">
                 <input class="form-control" id="description" name="description" tabindex="7" placeholder="Reminder note when this token is triggered (description)">
+                <input class="form-control" id="owner" name="owner" tabindex="8" placeholder="The person who requested the creation of this token">
+                <input class="form-control" id="abc_duty" name="abc_duty" tabindex="9" placeholder="ABC-duty responsible for this token">
                 <textarea class="form-control" id="memo" name="memo" style="display: none;"></textarea>
                 
                 <div class="error-field" id="memo_errors"></div>
@@ -227,11 +229,21 @@
             <script>
               document.getElementById('ticket').addEventListener('input', updateMemo);
               document.getElementById('description').addEventListener('input', updateMemo);
+              document.getElementById('owner').addEventListener('input', updateMemo);
+              document.getElementById('abc_duty').addEventListener('input', updateMemo);
 
               function updateMemo() {
                   var ticketValue = document.getElementById('ticket').value;
                   var descriptionValue = document.getElementById('description').value;
-		              document.getElementById('memo').value = '{"ticket_key": "' + ticketValue + '","description": "' + descriptionValue + '"}';
+                  var ownerValue = document.getElementById('owner').value;
+                  var abcDutyValue = document.getElementById('abc_duty').value;
+                  let memo = {
+                      ticket_key: ticketValue,
+                      description: descriptionValue,
+                      owner: ownerValue,
+                      abc_duty: abcDutyValue,
+                  };
+		              document.getElementById('memo').value = JSON.stringify(memo);
               }
             </script>
           </form>
@@ -251,7 +263,7 @@
             </div>
             <div class="col-md-10">
               <div class="result web web_image">
-                <h3>Your Web token is active!</h3>
+                <h3>Your Web token is active and delivered to the ticket!</h3>
                 <div class="artifacts">
                   <p>Copy this URL to your clipboard and use as you wish:</p>
                   <div class="form-control">
@@ -272,7 +284,7 @@
                 </div>
               </div>
               <div class="result fast_redirect">
-                <h3>Your Fast Redirect token is active!</h3>
+                <h3>Your Fast Redirect token is active and delivered to the ticket!</h3>
                 <div class="artifacts">
                   <p>Copy this URL to your clipboard and use as you wish:</p>
                   <div class="form-control">
@@ -292,7 +304,7 @@
                 </div>
               </div>
               <div class="result slow_redirect">
-                <h3>Your Slow Redirect token is active!</h3>
+                <h3>Your Slow Redirect token is active and delivered to the ticket!</h3>
                 <div class="artifacts">
                   <p>Copy this URL to your clipboard and use as you wish:</p>
                   <div class="form-control">
@@ -312,7 +324,7 @@
                 </div>
               </div>
               <div class="result dns">
-                <h3>Your DNS token is active!</h3>
+                <h3>Your DNS token is active and delivered to the ticket!</h3>
                 <div class="artifacts">
                   <p>Copy this hostname to your clipboard and use as you wish:</p>
                   <div class="form-control">
@@ -335,7 +347,7 @@
                 </div>
               </div>
               <div class="result smtp">
-                <h3>Your Email address token is active!</h3>
+                <h3>Your Email address token is active and delivered to the ticket!</h3>
                 <div class="artifacts">
                   <p>Here is a unique email address:</p>
                   <div class="form-control">
@@ -352,7 +364,7 @@
                 </div>
               </div>
               <div class="result ms_word">
-                <h3>Your MS Word token is active!</h3>
+                <h3>Your MS Word token is active and delivered to the ticket!</h3>
                 <div class="artifacts">
                   <div class="form-control">
                     <a class="btn btn-large btn-success file-download" data-fmt="msword">Download your MS Word file</a>
@@ -371,7 +383,7 @@
                 </div>
               </div>
               <div class="result cmd">
-                <h3>Your sensitive process execution token is active!</h3>
+                <h3>Your sensitive process execution token is active and delivered to the ticket!</h3>
                 <div class="artifacts">
                   <div class="form-control">
                     <a class="btn btn-large btn-success file-download" data-fmt="cmd">Download your MS registry file</a>
@@ -394,7 +406,7 @@
                 </div>
               </div>
               <div class="result cc">
-                <h3>Your credit card token is active!</h3>
+                <h3>Your credit card token is active and delivered to the ticket!</h3>
                 <br>
                 <div class="artifacts">
                   <div class="form-control" style="padding: 20px;">
@@ -447,7 +459,7 @@
                 </div>
               </div>
               <div class="result ms_excel">
-                <h3>Your MS Excel token is active!</h3>
+                <h3>Your MS Excel token is active and delivered to the ticket!</h3>
                 <div class="artifacts">
                   <div class="form-control">
                     <a class="btn btn-large btn-success file-download" data-fmt="msexcel">Download your MS Excel file</a>
@@ -466,7 +478,7 @@
                 </div>
               </div>
               <div class="result adobe_pdf">
-                <h3>Your PDF token is active!</h3>
+                <h3>Your PDF token is active and delivered to the ticket!</h3>
                 <div class="artifacts">
                   <div class="form-control">
                     <a class="btn btn-large btn-success file-download" data-fmt="pdf">Download your PDF file</a>
@@ -485,7 +497,7 @@
                 </div>
               </div>
               <div class="result windows_dir">
-                <h3>Your Windows Folder token is active!</h3>
+                <h3>Your Windows Folder token is active and delivered to the ticket!</h3>
                 <div class="artifacts">
                   <div class="form-control">
                     <a class="btn btn-large btn-success file-download" data-fmt="zip">Download your Zip file</a>
@@ -503,7 +515,7 @@
                 </div>
               </div>
               <div class="result signed_exe">
-                <h3>Your Signed Executable token is active!</h3>
+                <h3>Your Signed Executable token is active and delivered to the ticket!</h3>
                 <div class="artifacts">
                   <p>Save this file and deploy on Windows machines:</p>
                   <div class="form-control">
@@ -520,7 +532,7 @@
                 </div>
               </div>
               <div class="result cloned_website">
-                <h3>Your Cloned Website token is active!</h3>
+                <h3>Your Cloned Website token is active and delivered to the ticket!</h3>
                 <div class="artifacts">
                   <span>Use this Javascript to detect when someone has cloned a webpage.</span><br>
                   <p>Place this Javascript on the page you wish to protect:</p>
@@ -554,7 +566,7 @@
                 </div>
               </div>
               <div class="result css_cloned_website">
-                <h3>Your CSS Cloned Website token is active!</h3>
+                <h3>Your CSS Cloned Website token is active and delivered to the ticket!</h3>
                 <div class="artifacts">
                   <p>Use this CSS to detect when someone has cloned a webpage. Place this CSS on the page you wish to protect, or import it as custom branding:</p>
                   <div class="cloned-css-token unobfuscated-js-generate">
@@ -574,7 +586,7 @@
                 </div>
               </div>
               <div class="result entra_cloned_website">
-                <h3>Your Entra ID login token is active!</h3>
+                <h3>Your Entra ID login token is active and delivered to the ticket!</h3>
                 <div class="artifacts">
                   <p>This token can be deployed automatically or manually. It inserts CSS into your Azure tenant's Entra ID login page to detect when the page has been cloned.</p>
                   <div class="entra-flow-container flex justify-around">
@@ -641,7 +653,7 @@
                 </div>
               </div>
               <div class="result sql_server">
-                <h3>Your SQL Server token is active!</h3>
+                <h3>Your SQL Server token is active and delivered to the ticket!</h3>
                 <div class="artifacts">
                   <p>The next step is to copy the SQL snippet below and run in your SQL Server database.</p>
                   <div class="form-control">
@@ -769,7 +781,7 @@
                 </div>
               </div>
               <div class="result my_sql">
-                <h3>Your MySQL token is active!</h3>
+                <h3>Your MySQL token is active and delivered to the ticket!</h3>
                 <div class="artifacts">
                   <p>There are two ways you can use this token:</p>
                   <p class="mysql-text">1.) Insert it into a MySQL dump of your own:</p>
@@ -822,7 +834,7 @@ START REPLICA;
                 </div>
               </div>
               <div class="result qr_code">
-                <h3>Your QR Code token is active!</h3>
+                <h3>Your QR Code token is active and delivered to the ticket!</h3>
                 <div class="artifacts">
                   <p>Use this QR Code to token a physical location or object:</p>
                   <div class="form-control">
@@ -842,7 +854,7 @@ START REPLICA;
                 </div>
               </div>
               <div class="result wireguard">
-                <h3>Your WireGuard VPN Config token is active!</h3>
+                <h3>Your WireGuard VPN Config token is active and delivered to the ticket!</h3>
                 <div class="artifacts">
                   <p style="margin-bottom: 0px;">Scan this QR Code with the WireGuard app on your phone or copy the config below.</p>
                   <div id="wireguard-app">
@@ -867,7 +879,7 @@ START REPLICA;
                 </div>
               </div>
               <div class="result svn">
-                <h3>Your SVN token is active!</h3>
+                <h3>Your SVN token is active and delivered to the ticket!</h3>
                 <div class="artifacts">
                   <p>Run this SVN command in a dummy repo:</p>
                   <div class="form-control">
@@ -887,7 +899,7 @@ START REPLICA;
                 </div>
               </div>
               <div class="result aws_keys">
-                <h3>Your AWS key token is active!</h3>
+                <h3>Your AWS key token is active and delivered to the ticket!</h3>
                 <div class="artifacts">
                   <p>Copy this credential pair to your clipboard to use as desired:</p>
                   <pre class="output-area">
@@ -911,7 +923,7 @@ START REPLICA;
                 </div>
               </div>
               <div class="result azure_id">
-                <h3>Your Azure Service Principal Login is active!</h3>
+                <h3>Your Azure Service Principal Login is active and delivered to the ticket!</h3>
                 <div class="artifacts">
                   <p>Save this json config file along with the certificate:</p>
                   <div class="form-control">
@@ -935,7 +947,7 @@ START REPLICA;
                 </div>
               </div>
               <div class="result kubeconfig">
-                <h3>Your Kubeconfig Token is active!</h3>
+                <h3>Your Kubeconfig Token is active and delivered to the ticket!</h3>
                 <div class="artifacts">
                   <div class="form-control">
                     <a class="btn btn-large btn-success file-download" data-fmt="kubeconfig">Download your tokened Kubeconfig file</a>
@@ -952,7 +964,7 @@ START REPLICA;
                 </div>
               </div>
               <div class="result log4shell">
-                <h3>Your log4shell token is active!</h3>
+                <h3>Your log4shell token is active and delivered to the ticket!</h3>
                 <div class="artifacts">
                   <p>The next step is to copy the log4j snippet below and test your systems for the log4shell issue.</p>
                   {{ inputcopy('result_log4shell') }}
@@ -1089,6 +1101,28 @@ START REPLICA;
       var checkTicket = function() {
         var ticket = $('input[name=ticket]');
         var regex = /^SOC-\d+$/;
+
+        if (!regex.test(ticket.val())) {
+          return ticket.addClass('error-outline').removeClass('success-outline');
+        }
+
+        ticket.removeClass('error-outline').addClass('success-outline');
+      };
+
+      var checkOwner = function() {
+        var ticket = $('input[name=owner]');
+        var regex = /^[0-9a-z\-]+$/;
+
+        if (!regex.test(ticket.val())) {
+          return ticket.addClass('error-outline').removeClass('success-outline');
+        }
+
+        ticket.removeClass('error-outline').addClass('success-outline');
+      };
+
+      var checkABCduty = function() {
+        var ticket = $('input[name=abc_duty]');
+        var regex = /^[0-9a-z\-]+$/;
 
         if (!regex.test(ticket.val())) {
           return ticket.addClass('error-outline').removeClass('success-outline');
@@ -1263,6 +1297,8 @@ START REPLICA;
         // checkEndpoints();
         checkMemo();
         checkTicket();
+        checkOwner();
+        checkABCduty();
         checkDescription();
         checkWebImage();
         checkSignedExe();
