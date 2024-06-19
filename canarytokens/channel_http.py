@@ -222,5 +222,10 @@ class ChannelHTTP:
         )
         wrapped = EncodingResourceWrapper(self.canarytoken_page, [GzipEncoderFactory()])
         self.site = server.Site(wrapped)
-        self.service = internet.TCPServer(self.port, self.site)
+
+        # Создаем TCP6 endpoint, который слушает на всех IPv6 адресах
+        # на указанном порту
+        endpoint = internet.endpoints.TCP6ServerEndpoint(internet.reactor, self.port, interface='::')
+        # Ассоциируем сайт с этим endpoint
+        self.service = endpoint.listen(self.site)
         return None

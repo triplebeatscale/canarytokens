@@ -1,7 +1,7 @@
 import json
 import random
 from datetime import datetime
-from ipaddress import IPv4Address
+from ipaddress import IPv4Address, IPv6Address
 from typing import TypedDict
 
 from OpenSSL.crypto import (
@@ -312,7 +312,10 @@ class ChannelKubeConfig:
         self.server_ca_redis_key = kubeconfig.ServerCA
         self.server_cert_redis_key = kubeconfig.ServerCert
         self.port = switchboard_settings.CHANNEL_MTLS_KUBECONFIG_PORT
-        self.ip = IPv4Address(frontend_settings.PUBLIC_IP)
+        try:
+            self.ip = IPv4Address(frontend_settings.PUBLIC_IP)
+        except:
+            self.ip = IPv6Address(frontend_settings.PUBLIC_IP)
         self.channel_name = INPUT_CHANNEL_MTLS
 
         save_kc_endpoint(ip=self.ip, port=self.port)
