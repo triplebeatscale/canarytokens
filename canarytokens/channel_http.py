@@ -4,6 +4,8 @@ from pydantic import ValidationError, parse_obj_as
 from twisted.application import internet
 from twisted.logger import Logger
 from twisted.python.failure import Failure
+from twisted.internet.endpoints import TCP6ServerEndpoint
+from twisted.internet import reactor
 
 # from canarytokens.channel_dns import create_token_hit
 from twisted.web import resource, server
@@ -223,9 +225,6 @@ class ChannelHTTP:
         wrapped = EncodingResourceWrapper(self.canarytoken_page, [GzipEncoderFactory()])
         self.site = server.Site(wrapped)
 
-        # Создаем TCP6 endpoint, который слушает на всех IPv6 адресах
-        # на указанном порту
-        endpoint = internet.endpoints.TCP6ServerEndpoint(internet.reactor, self.port, interface='::')
-        # Ассоциируем сайт с этим endpoint
-        self.service = endpoint.listen(self.site)
+        self.endpoint = TCP6ServerEndpoint(reactor, self.port, interface='::')
+        self.service = internet.StreamServerEndpointService(self.endpoint, self.site)
         return None
