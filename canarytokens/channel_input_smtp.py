@@ -5,7 +5,8 @@ from datetime import datetime
 from typing import Dict, List, Optional, Pattern, Tuple, TypedDict
 
 from twisted.application import internet
-from twisted.internet import defer
+from twisted.internet.endpoints import TCP6ServerEndpoint
+from twisted.internet import defer, reactor
 from twisted.logger import Logger
 from twisted.mail import smtp
 from twisted.mail.smtp import Address, User
@@ -261,11 +262,20 @@ class ChannelSMTP:
         switchboard_settings: SwitchboardSettings,
         switchboard: Switchboard,
     ):
-        self.service = internet.TCPServer(
-            switchboard_settings.CHANNEL_SMTP_PORT,
-            CanarySMTPFactory(
+        if len(frontend_settings.PUBLIC_IP.split("."))==4:
+            self.service = internet.TCPServer(
+                switchboard_settings.CHANNEL_SMTP_PORT,
+                CanarySMTPFactory(
+                    switchboard=switchboard,
+                    frontend_settings=frontend_settings,
+                    switchboard_settings=switchboard_settings,
+                ),
+            )
+        else: 
+            endpoint = TCP6ServerEndpoint(reactor, int(switchboard_settings.CHANNEL_SMTP_PORT))
+            factory = CanarySMTPFactory(
                 switchboard=switchboard,
                 frontend_settings=frontend_settings,
                 switchboard_settings=switchboard_settings,
-            ),
-        )
+            )
+            self.service = internet.StreamServerEndpointService(endpoint, factory)

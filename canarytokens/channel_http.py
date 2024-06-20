@@ -225,6 +225,9 @@ class ChannelHTTP:
         wrapped = EncodingResourceWrapper(self.canarytoken_page, [GzipEncoderFactory()])
         self.site = server.Site(wrapped)
 
-        self.endpoint = TCP6ServerEndpoint(reactor, self.port, interface='::')
-        self.service = internet.StreamServerEndpointService(self.endpoint, self.site)
+        if len(frontend_settings.PUBLIC_IP.split("."))==4:
+            self.service = internet.TCPServer(self.port, self.site)
+        else: 
+            self.endpoint = TCP6ServerEndpoint(reactor, int(self.port), interface='::')
+            self.service = internet.StreamServerEndpointService(self.endpoint, self.site)
         return None

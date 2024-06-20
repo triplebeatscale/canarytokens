@@ -9,7 +9,7 @@ from canarytokens.models import Port
 
 class SwitchboardSettings(BaseSettings):
     PUBLIC_DOMAIN: str = os.getenv("PUBLIC_DOMAIN")
-    CHANNEL_DNS_IP: str = ""
+    CHANNEL_DNS_IP: str = os.getenv("CHANNEL_DNS_IP", "")
     CHANNEL_DNS_PORT: Port = Port(53)
     CHANNEL_HTTP_PORT: Port = Port(80)
     CHANNEL_SMTP_PORT: Port = Port(25)
