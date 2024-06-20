@@ -128,7 +128,7 @@ class ChannelMySQL:
                 ),
             )
         else: 
-            endpoint = TCP6ServerEndpoint(reactor, port)
+            endpoint = TCP6ServerEndpoint(reactor, int(port))
             factory = CanaryMySQLFactory(
                 switchboard=switchboard,
                 switchboard_scheme=switchboard_scheme,

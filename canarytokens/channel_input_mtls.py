@@ -349,7 +349,7 @@ class ChannelKubeConfig:
             )
         else:
             endpoint = SSL4ServerEndpoint(reactor, 
-                                        self.port, 
+                                        int(self.port), 
                                         self._get_ssl_context(
                                             client_ca_redis_key=self.client_ca_redis_key,
                                             server_ca_redis_key=self.server_ca_redis_key,
