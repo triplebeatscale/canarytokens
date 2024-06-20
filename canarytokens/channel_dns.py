@@ -116,7 +116,7 @@ class ChannelDNS(InputChannel):
         )
         additional = dns.RRHeader(
             name=".".join(["ns1", name.decode()]),
-            payload=dns.Record_A(ttl=10, address=self.frontend_settings.PUBLIC_IP),
+            payload=dns.Record_A(ttl=10, address=self.frontend_settings.PUBLIC_IP) if len(self.frontend_settings.PUBLIC_IP.split("."))==4 else dns.Record_AAAA(ttl=10, address=self.frontend_settings.PUBLIC_IP),
             type=dns.A,
             auth=True,
             ttl=300,
@@ -163,7 +163,10 @@ class ChannelDNS(InputChannel):
             # This is a resolution of the apex domain, not a token, so we can bump up the TTL
             ttl = 600  # 10 min seems plenty short enough to allow for IP changes without getting overloaded
 
-        payload = dns.Record_A(ttl=ttl, address=self.frontend_settings.PUBLIC_IP)
+        if len(self.frontend_settings.PUBLIC_IP.split("."))==4:
+            payload = dns.Record_A(ttl=ttl, address=self.frontend_settings.PUBLIC_IP)
+        else:
+            payload = dns.Record_AAAA(ttl=ttl, address=self.frontend_settings.PUBLIC_IP)
         answer = dns.RRHeader(
             name=name, payload=payload, type=dns.A, auth=True, ttl=ttl
         )
