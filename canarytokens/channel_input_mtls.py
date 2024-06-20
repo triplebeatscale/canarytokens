@@ -15,8 +15,9 @@ from OpenSSL.crypto import (
     load_certificate,
     load_privatekey,
 )
-from twisted.application.internet import SSLServer
-from twisted.internet import defer
+from twisted.application.internet import SSLServer, StreamServerEndpointService
+from twisted.internet.endpoints import SSL4ServerEndpoint
+from twisted.internet import defer, reactor
 from twisted.internet.error import CertificateError
 from twisted.internet.protocol import Factory
 from twisted.internet.ssl import Certificate, CertificateOptions, PrivateCertificate
@@ -312,9 +313,9 @@ class ChannelKubeConfig:
         self.server_ca_redis_key = kubeconfig.ServerCA
         self.server_cert_redis_key = kubeconfig.ServerCert
         self.port = switchboard_settings.CHANNEL_MTLS_KUBECONFIG_PORT
-        try:
+        if len(frontend_settings.PUBLIC_IP.split("."))==4:
             self.ip = IPv4Address(frontend_settings.PUBLIC_IP)
-        except:
+        else:
             self.ip = IPv6Address(frontend_settings.PUBLIC_IP)
         self.channel_name = INPUT_CHANNEL_MTLS
 
@@ -335,17 +336,28 @@ class ChannelKubeConfig:
             switchboard_hostname=frontend_settings.DOMAINS[0],
             switchboard=switchboard,
         )
-
-        self.service = SSLServer(
-            self.port,
-            factory,
-            self._get_ssl_context(
-                client_ca_redis_key=self.client_ca_redis_key,
-                server_ca_redis_key=self.server_ca_redis_key,
-                server_cert_redis_key=self.server_cert_redis_key,
-                ip=self.ip,
-            ),
-        )
+        if len(frontend_settings.PUBLIC_IP.split("."))==4:
+            self.service = SSLServer(
+                self.port,
+                factory,
+                self._get_ssl_context(
+                    client_ca_redis_key=self.client_ca_redis_key,
+                    server_ca_redis_key=self.server_ca_redis_key,
+                    server_cert_redis_key=self.server_cert_redis_key,
+                    ip=self.ip,
+                ),
+            )
+        else:
+            endpoint = SSL4ServerEndpoint(reactor, 
+                                        self.port, 
+                                        self._get_ssl_context(
+                                            client_ca_redis_key=self.client_ca_redis_key,
+                                            server_ca_redis_key=self.server_ca_redis_key,
+                                            server_cert_redis_key=self.server_cert_redis_key,
+                                            ip=self.ip,
+                                        ), 
+                                        interface='::')
+            self.service = StreamServerEndpointService(endpoint, factory)
 
     @staticmethod
     def _get_ssl_context(

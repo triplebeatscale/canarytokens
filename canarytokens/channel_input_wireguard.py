@@ -8,16 +8,17 @@ from typing import Optional, Tuple
 import nacl.bindings
 import nacl.encoding
 import nacl.public
-from twisted.application import internet
+from twisted.application import internet, service
 from twisted.internet.protocol import DatagramProtocol
 from twisted.logger import Logger
+from twisted.internet import reactor
 
 from canarytokens import queries
 from canarytokens.canarydrop import Canarydrop
 from canarytokens.channel import InputChannel
 from canarytokens.constants import INPUT_CHANNEL_WIREGUARD
 from canarytokens.models import TokenTypes, WireguardTokenHit
-from canarytokens.settings import SwitchboardSettings
+from canarytokens.settings import SwitchboardSettings, FrontendSettings
 from canarytokens.switchboard import Switchboard
 from canarytokens.tokens import Canarytoken
 from canarytokens.exceptions import NoCanarytokenFound
@@ -175,6 +176,7 @@ class ChannelWireGuard(InputChannel):
         switchboard_scheme: str,
         switchboard_hostname: str,
         switchboard_settings: SwitchboardSettings,
+        frontend_settings: FrontendSettings,
     ) -> None:
         InputChannel.__init__(
             self,
@@ -184,7 +186,13 @@ class ChannelWireGuard(InputChannel):
             name=self.CHANNEL,
             unique_channel=True,
         )
-        self.service = internet.UDPServer(
-            port,
-            WireGuardProtocol(channel=self, switchboard_settings=switchboard_settings),
-        )
+        if len(frontend_settings.PUBLIC_IP.split("."))==4:
+            self.service = internet.UDPServer(
+                port,
+                WireGuardProtocol(channel=self, switchboard_settings=switchboard_settings),
+            )
+        else:
+            protocol = WireGuardProtocol(channel=self, switchboard_settings=switchboard_settings)
+            self.service = service.MultiService()
+            udp_service = reactor.listenUDP(port, protocol, interface='::')
+            udp_service.setServiceParent(self.service)
