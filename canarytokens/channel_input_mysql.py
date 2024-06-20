@@ -7,7 +7,7 @@ from twisted.logger import Logger
 from twisted.internet.endpoints import TCP6ServerEndpoint
 from twisted.internet import reactor
 
-from canarytokens.settings import FrontendSettings
+from canarytokens.settings import SwitchboardSettings
 from canarytokens.canarydrop import Canarydrop
 from canarytokens.channel import InputChannel
 from canarytokens.constants import INPUT_CHANNEL_MYSQL
@@ -116,9 +116,17 @@ class ChannelMySQL:
         switchboard: Switchboard,
         switchboard_scheme: str,
         switchboard_hostname: str,
-        frontend_settings: FrontendSettings,
+        switchboard_settings: SwitchboardSettings,
     ):
-        if len(frontend_settings.PUBLIC_IP.split("."))==4:
+        if switchboard_settings.IPV6:
+            endpoint = TCP6ServerEndpoint(reactor, int(port))
+            factory = CanaryMySQLFactory(
+                switchboard=switchboard,
+                switchboard_scheme=switchboard_scheme,
+                switchboard_hostname=switchboard_hostname,
+            )
+            self.service = internet.StreamServerEndpointService(endpoint, factory)
+        else:
             self.service = internet.TCPServer(
                 port,
                 CanaryMySQLFactory(
@@ -127,11 +135,3 @@ class ChannelMySQL:
                     switchboard_hostname=switchboard_hostname,
                 ),
             )
-        else: 
-            endpoint = TCP6ServerEndpoint(reactor, int(port))
-            factory = CanaryMySQLFactory(
-                switchboard=switchboard,
-                switchboard_scheme=switchboard_scheme,
-                switchboard_hostname=switchboard_hostname,
-            )
-            self.service = internet.StreamServerEndpointService(endpoint, factory)

@@ -117,7 +117,7 @@ class ChannelDNS(InputChannel):
         additional = dns.RRHeader(
             name=".".join(["ns1", name.decode()]),
             payload=dns.Record_A(ttl=10, address=self.frontend_settings.PUBLIC_IP) if len(self.frontend_settings.PUBLIC_IP.split("."))==4 else dns.Record_AAAA(ttl=10, address=self.frontend_settings.PUBLIC_IP),
-            type=dns.A,
+            type=dns.A if len(self.frontend_settings.PUBLIC_IP.split("."))==4 else dns.AAAA,
             auth=True,
             ttl=300,
         )
@@ -165,11 +165,14 @@ class ChannelDNS(InputChannel):
 
         if len(self.frontend_settings.PUBLIC_IP.split("."))==4:
             payload = dns.Record_A(ttl=ttl, address=self.frontend_settings.PUBLIC_IP)
+            answer = dns.RRHeader(
+                name=name, payload=payload, type=dns.A, auth=True, ttl=ttl
+            )
         else:
             payload = dns.Record_AAAA(ttl=ttl, address=self.frontend_settings.PUBLIC_IP)
-        answer = dns.RRHeader(
-            name=name, payload=payload, type=dns.A, auth=True, ttl=ttl
-        )
+            answer = dns.RRHeader(
+                name=name, payload=payload, type=dns.AAAA, auth=True, ttl=ttl
+            )
         answers = [answer]
         authority: list[str] = []
         additional: list[str] = []
@@ -216,7 +219,7 @@ class ChannelDNS(InputChannel):
         if query.type == dns.SOA:
             return defer.succeed(self._do_soa_response(name=query.name.name))
 
-        if query.type != dns.A:
+        if query.type != dns.A and query.type != dns.AAAA:
             return defer.succeed(self._do_no_response(query=query))
         log.info(f"handling query:  {query.name}")
         try:

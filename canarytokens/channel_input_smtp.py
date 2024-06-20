@@ -262,7 +262,15 @@ class ChannelSMTP:
         switchboard_settings: SwitchboardSettings,
         switchboard: Switchboard,
     ):
-        if len(frontend_settings.PUBLIC_IP.split("."))==4:
+        if switchboard_settings.IPV6:
+            endpoint = TCP6ServerEndpoint(reactor, int(switchboard_settings.CHANNEL_SMTP_PORT))
+            factory = CanarySMTPFactory(
+                switchboard=switchboard,
+                frontend_settings=frontend_settings,
+                switchboard_settings=switchboard_settings,
+            )
+            self.service = internet.StreamServerEndpointService(endpoint, factory)
+        else: 
             self.service = internet.TCPServer(
                 switchboard_settings.CHANNEL_SMTP_PORT,
                 CanarySMTPFactory(
@@ -271,11 +279,3 @@ class ChannelSMTP:
                     switchboard_settings=switchboard_settings,
                 ),
             )
-        else: 
-            endpoint = TCP6ServerEndpoint(reactor, int(switchboard_settings.CHANNEL_SMTP_PORT))
-            factory = CanarySMTPFactory(
-                switchboard=switchboard,
-                frontend_settings=frontend_settings,
-                switchboard_settings=switchboard_settings,
-            )
-            self.service = internet.StreamServerEndpointService(endpoint, factory)

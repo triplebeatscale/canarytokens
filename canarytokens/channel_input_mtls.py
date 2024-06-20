@@ -336,18 +336,7 @@ class ChannelKubeConfig:
             switchboard_hostname=frontend_settings.DOMAINS[0],
             switchboard=switchboard,
         )
-        if len(frontend_settings.PUBLIC_IP.split("."))==4:
-            self.service = SSLServer(
-                self.port,
-                factory,
-                self._get_ssl_context(
-                    client_ca_redis_key=self.client_ca_redis_key,
-                    server_ca_redis_key=self.server_ca_redis_key,
-                    server_cert_redis_key=self.server_cert_redis_key,
-                    ip=self.ip,
-                ),
-            )
-        else:
+        if switchboard_settings.IPV6:
             endpoint = SSL4ServerEndpoint(reactor, 
                                         int(self.port), 
                                         self._get_ssl_context(
@@ -358,6 +347,17 @@ class ChannelKubeConfig:
                                         ), 
                                         interface='::')
             self.service = StreamServerEndpointService(endpoint, factory)
+        else:
+            self.service = SSLServer(
+                self.port,
+                factory,
+                self._get_ssl_context(
+                    client_ca_redis_key=self.client_ca_redis_key,
+                    server_ca_redis_key=self.server_ca_redis_key,
+                    server_cert_redis_key=self.server_cert_redis_key,
+                    ip=self.ip,
+                ),
+            )
 
     @staticmethod
     def _get_ssl_context(

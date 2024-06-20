@@ -23,6 +23,7 @@ class SwitchboardSettings(BaseSettings):
     REDIS_PORT: Port = Port(6379)
     REDIS_DB: str = os.getenv("REDIS_DB","0")
     REDIS_PASSWORD: str = os.getenv("REDIS_PASSWORD", "auth_disabled")
+    IPV6: bool = True if os.getenv("IPV6")=="True" else False
 
     REAL_IP_HEADER: str = "x-real-ip"
 
