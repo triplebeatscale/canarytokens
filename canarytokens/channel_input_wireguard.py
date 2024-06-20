@@ -189,4 +189,5 @@ class ChannelWireGuard(InputChannel):
         self.service = internet.UDPServer(
             port,
             WireGuardProtocol(channel=self, switchboard_settings=switchboard_settings),
+            interface='0.0.0.0' if len(frontend_settings.PUBLIC_IP.split("."))==4 else '::'
         )
