@@ -186,13 +186,7 @@ class ChannelWireGuard(InputChannel):
             name=self.CHANNEL,
             unique_channel=True,
         )
-        if len(frontend_settings.PUBLIC_IP.split("."))==4:
-            self.service = internet.UDPServer(
-                port,
-                WireGuardProtocol(channel=self, switchboard_settings=switchboard_settings),
-            )
-        else:
-            protocol = WireGuardProtocol(channel=self, switchboard_settings=switchboard_settings)
-            self.service = service.MultiService()
-            udp_service = reactor.listenUDP(port, protocol, interface='::')
-            udp_service.setServiceParent(self.service)
+        self.service = internet.UDPServer(
+            port,
+            WireGuardProtocol(channel=self, switchboard_settings=switchboard_settings),
+        )
