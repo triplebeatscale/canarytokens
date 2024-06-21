@@ -8,17 +8,16 @@ from typing import Optional, Tuple
 import nacl.bindings
 import nacl.encoding
 import nacl.public
-from twisted.application import internet, service
+from twisted.application import internet
 from twisted.internet.protocol import DatagramProtocol
 from twisted.logger import Logger
-from twisted.internet import reactor
 
 from canarytokens import queries
 from canarytokens.canarydrop import Canarydrop
 from canarytokens.channel import InputChannel
 from canarytokens.constants import INPUT_CHANNEL_WIREGUARD
 from canarytokens.models import TokenTypes, WireguardTokenHit
-from canarytokens.settings import SwitchboardSettings, FrontendSettings
+from canarytokens.settings import SwitchboardSettings
 from canarytokens.switchboard import Switchboard
 from canarytokens.tokens import Canarytoken
 from canarytokens.exceptions import NoCanarytokenFound
@@ -176,7 +175,6 @@ class ChannelWireGuard(InputChannel):
         switchboard_scheme: str,
         switchboard_hostname: str,
         switchboard_settings: SwitchboardSettings,
-        frontend_settings: FrontendSettings,
     ) -> None:
         InputChannel.__init__(
             self,

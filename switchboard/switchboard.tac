@@ -157,7 +157,7 @@ canarytokens_mysql = ChannelMySQL(
     switchboard=switchboard,
     switchboard_scheme=switchboard_settings.SWITCHBOARD_SCHEME,
     switchboard_hostname=frontend_settings.DOMAINS[0],
-    frontend_settings=frontend_settings,
+    switchboard_settings=switchboard_settings,
 )
 canarytokens_mysql.service.setServiceParent(application)
 
@@ -167,7 +167,6 @@ canarytokens_wireguard = ChannelWireGuard(
     switchboard_scheme=switchboard_settings.SWITCHBOARD_SCHEME,
     switchboard_hostname=frontend_settings.DOMAINS[0],
     switchboard_settings=switchboard_settings,
-    frontend_settings=frontend_settings,
 )
 canarytokens_wireguard.service.setServiceParent(application)
 
